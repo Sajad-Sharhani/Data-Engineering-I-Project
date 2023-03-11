@@ -1,0 +1,19 @@
+# To start the container, run:
+
+# docker-compose up -d
+
+# To Enter the container, run:
+
+# docker exec -it <spark-master-container-id> /bin/bash
+
+# To scale the number of workers, run:
+
+# docker-compose scale sparkwoker=<number-of-workers>
+
+# To stop the container, run:
+
+# docker-compose stop
+
+# To remove the container, run:
+
+# docker-compose rm

@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+    spark-master: 
+      image: 192.168.2.98:5000/masterswarm
+      ports:
+            - "8080:8080"
+            - "7077:7077"
+      build: .
+      command: /bin/sh -c "/usr/local/spark/sbin/start-master.sh"
+      networks:
+#            - bridge
+            - sparknet
+      deploy:
+        placement:
+          constraints:
+            - node.role == manager
+    spark-worker:
+      image: 192.168.2.98:5000/workerswarm
+      ports:
+        - "7078:7078"
+        - "7079:7079"
+      build: .
+      command: /bin/sh -c "/usr/local/spark/sbin/start-worker.sh spark-master:7077"
+      deploy:
+        placement:
+          constraints:
+            - node.role == worker
+      networks:
+            - sparknet
+networks:
+  sparknet:
+    name: sparknet
+    external: true
+#  bridge:
+#    name: bridge
+#    external: true
