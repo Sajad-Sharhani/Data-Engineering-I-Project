@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  sparkmaster:
+    build: /home/ubuntu
+    ports:
+    - "8080:8080"
+    - "7077:7077"
+    command: /usr/local/spark/sbin/start-master.sh --host sparkmaster
+  sparkwoker:
+    build: /home/ubuntu
+    command: /usr/local/spark/sbin/start-worker.sh spark://sparkmaster:7077
+    depends_on:
+    - sparkmaster
