@@ -5,9 +5,22 @@ services:
     ports:
     - "8080:8080"
     - "7077:7077"
-    command: /usr/local/spark/sbin/start-master.sh --host sparkmaster
-  sparkwoker:
+    command:
+    - /usr/local/hadoop/bin/hdfs namenode -format
+    - /usr/local/hadoop/bin/hdfs --daemon start namenode
+    - /usr/local/spark/sbin/start-master.sh --host sparkmaster
+  sparkworker:
     build: /home/ubuntu
-    command: /usr/local/spark/sbin/start-worker.sh spark://sparkmaster:7077
+    command:
+    - /usr/local/hadoop/bin/hdfs --daemon start datanode
+    - /usr/local/spark/sbin/start-worker.sh spark://sparkmaster:7077
     depends_on:
     - sparkmaster
+
+
+
+
+
+
+
+
