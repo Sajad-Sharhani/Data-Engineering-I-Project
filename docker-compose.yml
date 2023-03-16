@@ -1,26 +1,19 @@
 version: "3.9"
 services:
   sparkmaster:
-    build: /home/ubuntu
+    build: /home/ubuntu/cluster
     ports:
-    - "8080:8080"
-    - "7077:7077"
-    command:
-    - /usr/local/hadoop/bin/hdfs namenode -format
-    - /usr/local/hadoop/bin/hdfs --daemon start namenode
-    - /usr/local/spark/sbin/start-master.sh --host sparkmaster
+      - "9000:9000"
+      - "8080:8080"
+      - "7077:7077"
+    command: >
+      bash -c "/usr/local/hadoop/bin/hdfs namenode -format
+      && /usr/local/hadoop/bin/hdfs --daemon start namenode
+      && /usr/local/spark/sbin/start-master.sh --host sparkmaster"
   sparkworker:
-    build: /home/ubuntu
-    command:
-    - /usr/local/hadoop/bin/hdfs --daemon start datanode
-    - /usr/local/spark/sbin/start-worker.sh spark://sparkmaster:7077
+    build: /home/ubuntu/cluster
+    command: >
+      bash -c "/usr/local/hadoop/bin/hdfs --daemon start datanode
+      && /usr/local/spark/sbin/start-worker.sh spark://sparkmaster:7077"
     depends_on:
-    - sparkmaster
-
-
-
-
-
-
-
-
+      - sparkmaster
