@@ -1,3 +1,23 @@
+## Multi-node
+
+# Create a swarm
+
+# docker swarm init
+
+# Copy the command to paste in the other VMs to join the swarm as workers
+
+# Make the network overlay
+
+# docker network create -d overlay --attachable --opt com.docker.network.driver.mtu=1450 sparknet
+
+# the command above is for solving the problem of the latency between the containers
+
+# Deploy the stack
+
+# docker stack deploy -c docker-compose.yml my-service
+
+## Single-node
+
 # To start the container, run:
 
 # docker-compose up -d
@@ -17,3 +37,4 @@
 # To remove the container, run:
 
 # docker-compose rm
+
