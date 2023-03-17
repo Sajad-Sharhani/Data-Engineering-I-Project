@@ -1,0 +1,12 @@
+FROM ubuntu:22.04
+# dependencies
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get install -y openjdk-11-jdk-headless
+RUN apt-get install -y scala
+RUN apt-get install -y wget
+RUN apt-get install -y screen
+RUN pip3 install pyspark==3.2.3
+RUN pip3 install notebook
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+CMD 

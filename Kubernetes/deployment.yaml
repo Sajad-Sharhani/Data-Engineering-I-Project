@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Worker
+spec:
+  selector:
+    matchLabels:
+      app: WorkerNode
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: WorkerNode
+    spec:
+      containers:
+      - name: SparkWorker
+        image: 
+        ports:
+      - name: DataNode
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Cluster
+spec:
+  selector:
+    matchLabels:
+      app: WorkerNode
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: WorkerNode
+    spec:
+      containers:
+      - name: SparkWorker
+        image:
+        ports:
+      - name: DataNode
