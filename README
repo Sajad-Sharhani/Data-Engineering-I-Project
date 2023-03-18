@@ -14,10 +14,10 @@
 # this will ssh to the Submit/Host/Driver node with port forwarding. With this terminal window open,
 # open a browser window and type:
 # 'localhost:8888' for jupyter notebook
-# 'localhost: 8080' for Spark GUI
-# 'localhost: 9000' for HDFS GUI
+# 'localhost:8080' for Spark GUI
 # 'localhost:4040' for Spark Driver GUI
-#
+# 'localhost:9870' for HDFS GUI
+# 
 # To check status of the cluster, login to the Master node and run (as root):
 # 'kubectl get deployments' to see deployment status
 # 'kubectl get pods' to see pod status

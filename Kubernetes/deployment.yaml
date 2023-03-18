@@ -33,7 +33,7 @@ spec:
     port: 7077
     targetPort: spark-port
 ---
-# Frontend port for HDFS webGUI
+# Frontend port for HDFS NameNode and HDFS webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -43,11 +43,16 @@ spec:
   selector:
     app: namenode
   ports:
+  - name: namenode-ext
+    protocol: TCP
+    port: 9000
+    targetPort: namenode-port
+    nodePort: 30090
   - name: hdfs-ext
     protocol: TCP
-    port: 50070
+    port: 9870
     targetPort: hdfs-gui
-    nodePort: 30000
+    nodePort: 30070
 ---
 # Frontend ports for Spark webGUIs
 apiVersion: v1
@@ -63,12 +68,12 @@ spec:
     protocol: TCP
     port: 8080
     targetPort: spark-gui
-    nodePort: 30001
+    nodePort: 30080
   - name: driver-ext
     protocol: TCP
     port: 4040
     targetPort: driver-gui
-    nodePort: 30002
+    nodePort: 30040
 ---
 # Frontend ports for jupyter notebook
 apiVersion: v1
@@ -84,7 +89,7 @@ spec:
     protocol: TCP
     port: 8888
     targetPort: notebook-port
-    nodePort: 30003
+    nodePort: 30088
 ---
 # Hadoop NameNode
 apiVersion: apps/v1
@@ -108,7 +113,7 @@ spec:
         ports:
         - containerPort: 9000
           name: namenode-port
-        - containerPort: 50070
+        - containerPort: 9870
           name: hdfs-gui
       nodeSelector:
         category: master #only run on Master Node
