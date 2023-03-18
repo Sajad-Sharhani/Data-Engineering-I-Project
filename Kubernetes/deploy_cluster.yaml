@@ -1,9 +1,10 @@
 # Kubernetes Deployments of all pods (NameNode, DataNodes, SparkMaster,
-# SparkWorkers, NotebookServer) that will run in the cluster
+# SparkWorkers, NotebookServer) that will run in the cluster, as well as
+# services that allow them to communicate
+#
 # written by Filip Bodlund Trostén, 2023
 #
-#
-# Hadoop network
+# network for Hadoop nodes
 apiVersion: v1
 kind: Service
 metadata:
@@ -18,7 +19,7 @@ spec:
     port: 9000
     targetPort: namenode-port
 ---
-# Spark network
+# network for Spark nodes
 apiVersion: v1
 kind: Service
 metadata:
