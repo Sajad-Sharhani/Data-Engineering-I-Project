@@ -1,6 +1,6 @@
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://HadoopNet:9000</value>
+        <value>hdfs://hadoopnet:9000</value>
     </property>
 </configuration>
