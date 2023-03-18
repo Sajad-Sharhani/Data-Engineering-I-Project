@@ -1,0 +1,13 @@
+FROM ubuntu:22.04
+# dependencies
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get install -y openjdk-11-jdk-headless
+RUN apt-get install -y scala
+RUN apt-get install -y wget
+RUN apt-get install -y screen
+RUN apt-get install -y python3-pip
+RUN pip3 install --no-cache pyspark==3.2.3
+RUN pip3 install --no-cache notebook
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+CMD jupyter-notebook --ip 0.0.0.0 --port 8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''

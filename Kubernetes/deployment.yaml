@@ -1,0 +1,212 @@
+# Kubernetes Deployments of all pods (NameNode, DataNodes, SparkMaster,
+# SparkWorkers, NotebookServer) that will run in the cluster
+# written by Filip Bodlund Trostén, 2023
+#
+#
+# Hadoop network
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoopnet
+spec:
+  type: ClusterIP # internal network
+  selector:
+    app: namenode
+  ports:
+  - name: hdfs-int
+    protocol: TCP
+    port: 9000
+    targetPort: namenode-port
+---
+# Spark network
+apiVersion: v1
+kind: Service
+metadata:
+  name: sparknet
+spec:
+  type: ClusterIP # internal network
+  selector:
+    app: sparkmaster
+  ports:
+  - name: spark-int
+    protocol: TCP
+    port: 7077
+    targetPort: spark-port
+---
+# Frontend port for HDFS webGUI
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-hdfs
+spec:
+  type: NodePort # externally available
+  selector:
+    app: namenode
+  ports:
+  - name: hdfs-ext
+    protocol: TCP
+    port: 50070
+    targetPort: hdfs-gui
+    nodePort: 30000
+---
+# Frontend ports for Spark webGUIs
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-front
+spec:
+  type: NodePort # externally available
+  selector:
+    app: sparkmaster
+  ports:
+  - name: spark-ext
+    protocol: TCP
+    port: 8080
+    targetPort: spark-gui
+    nodePort: 30001
+  - name: driver-ext
+    protocol: TCP
+    port: 4040
+    targetPort: driver-gui
+    nodePort: 30002
+---
+# Frontend ports for jupyter notebook
+apiVersion: v1
+kind: Service
+metadata:
+  name: notebook-front
+spec:
+  type: NodePort # externally available
+  selector:
+    app: notebook
+  ports:
+  - name: notebook-ext
+    protocol: TCP
+    port: 8888
+    targetPort: notebook-port
+    nodePort: 30003
+---
+# Hadoop NameNode
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: namenode
+spec:
+  selector:
+    matchLabels:
+      app: namenode
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: namenode
+    spec:
+      containers:
+      - name: namenode
+        image: fbtrost/de1-cluster:NameNode
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+          name: namenode-port
+        - containerPort: 50070
+          name: hdfs-gui
+      nodeSelector:
+        category: master #only run on Master Node
+---
+# Hadoop DataNodes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datanode
+spec:
+  selector:
+    matchLabels:
+      app: datanode
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: datanode
+    spec:
+      containers:
+      - name: datanode
+        image: fbtrost/de1-cluster:DataNode
+        imagePullPolicy: Always
+      nodeSelector:
+        category: worker #only run on worker nodes
+---
+# Spark Master node
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparkmaster
+spec:
+  selector:
+    matchLabels:
+      app: sparkmaster
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sparkmaster
+    spec:
+      containers:
+      - name: sparkmaster
+        image: fbtrost/de1-cluster:SparkMaster
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7077
+          name: spark-port
+        - containerPort: 8080
+          name: spark-gui
+        - containerPort: 4040
+          name: driver-gui
+      nodeSelector:
+        category: master #only run on Master Node
+---
+# Spark Worker nodes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparkworker
+spec:
+  selector:
+    matchLabels:
+      app: sparkworker
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: sparkworker
+    spec:
+      containers:
+      - name: sparkworker
+        image: fbtrost/de1-cluster:SparkWorker
+        imagePullPolicy: Always
+      nodeSelector:
+        category: worker #only run on worker nodes
+---
+# Jupyter notebook server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notebook
+spec:
+  selector:
+    matchLabels:
+      app: notebook
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: notebook
+    spec:
+      containers:
+      - name: notebook
+        image: fbtrost/de1-cluster:NotebookServer
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+          name: notebook-port
+      nodeSelector:
+        category: driver #only run on submit node

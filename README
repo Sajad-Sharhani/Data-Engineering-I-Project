@@ -1,40 +1,29 @@
-## Multi-node
-
-# Create a swarm
-
-# docker swarm init
-
-# Copy the command to paste in the other VMs to join the swarm as workers
-
-# Make the network overlay
-
-# docker network create -d overlay --attachable --opt com.docker.network.driver.mtu=1450 sparknet
-
-# the command above is for solving the problem of the latency between the containers
-
-# Deploy the stack
-
-# docker stack deploy -c docker-compose.yml my-service
-
-## Single-node
-
-# To start the container, run:
-
-# docker-compose up -d
-
-# To Enter the container, run:
-
-# docker exec -it <spark-master-container-id> /bin/bash
-
-# To scale the number of workers, run:
-
-# docker-compose scale sparkwoker=<number-of-workers>
-
-# To stop the container, run:
-
-# docker-compose stop
-
-# To remove the container, run:
-
-# docker-compose rm
-
+# Kubernetes implementation:
+# SparkMaster & NameNode run in separate pods on Master node
+# SparkWorkers & DataNodes run in separate pods on Worker nodes
+# NotebookServer runs on Submit node/Host node
+# Images are hosted on DockerHub fbtrost/de1-cluster
+#
+# To add a Node to the cluster, create a new VM,add it to the security group 'Group1_Cluster',
+# and run the bash script setup_agent.sh
+# In order to label it as a worker (enabling it to host Pods that select only worker nodes),
+# login to the Master node and run (as root): kubectl label nodes <HOSTNAME_OF_NEW_WORKER> category=worker
+# then additional workers can be deployed by changing the replicas field in deployment.yaml, e.g "replicas: 10" 
+#
+# to use the cluster, simply run ./clusterConnect.sh 
+# this will ssh to the Submit/Host/Driver node with port forwarding. With this terminal window open,
+# open a browser window and type:
+# 'localhost:8888' for jupyter notebook
+# 'localhost: 8080' for Spark GUI
+# 'localhost: 9000' for HDFS GUI
+# 'localhost:4040' for Spark Driver GUI
+#
+# To check status of the cluster, login to the Master node and run (as root):
+# 'kubectl get deployments' to see deployment status
+# 'kubectl get pods' to see pod status
+# 'kubectl logs <POD_NAME>' to get logs from a pod for debugging
+#
+# To modify status of the cluster (Think Carefully Before Restarting The Cluster!), login to the Master node and run (as root):
+# 'kubectl delete --all deployments' to cancel all deployments (preventing pods from restarting)
+# 'kubectl delete --all pods' to cancel all pods (killing currently active pods)
+# 'kubectl apply -f deployment.yaml' to relaunch the cluster according to specifications in deployment.yaml

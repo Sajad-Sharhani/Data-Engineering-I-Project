@@ -1,0 +1,17 @@
+FROM ubuntu:22.04
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get install -y openjdk-11-jdk-headless
+RUN apt-get install -y wget
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ADD https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz .
+RUN tar xvf hadoop-3.3.4.tar.gz
+RUN mv hadoop-3.3.4/ /usr/local/hadoop
+ENV HADOOP_HOME=/usr/local/hadoop
+ENV PATH=${PATH}:$HADOOP_HOME/bin
+ADD core-site.xml /usr/local/hadoop/etc/hadoop/core-site.xml
+ADD hdfs-site.xml /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+# 
+RUN $HADOOP_HOME/bin/hdfs namenode -format
+CMD $HADOOP_HOME/bin/hdfs namenode 
+# CMD bash -c "$HADOOP_HOME/bin/hdfs namenode -format && $HADOOP_HOME/bin/hdfs namenode"
