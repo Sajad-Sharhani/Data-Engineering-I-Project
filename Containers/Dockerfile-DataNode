@@ -11,4 +11,4 @@ ENV HADOOP_HOME=/usr/local/hadoop
 ENV PATH=${PATH}:$HADOOP_HOME/bin
 ADD core-site.xml /usr/local/hadoop/etc/hadoop/core-site.xml
 ADD hdfs-site.xml /usr/local/hadoop/etc/hadoop/hdfs-site.xml
-CMD$HADOOP_HOME/bin/hdfs datanode
+CMD $HADOOP_HOME/bin/hdfs datanode

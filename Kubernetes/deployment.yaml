@@ -1,39 +1,188 @@
-apiVersion: apps/v1
-kind: Deployment
+# Kubernetes Deployments of all pods (NameNode, DataNodes, SparkMaster,
+# SparkWorkers, NotebookServer) that will run in the cluster
+# written by Filip Bodlund Trostén, 2023
+
+# Hadoop network
+apiVersion: v1
+kind: Service
 metadata:
-  name: Worker
+  name: HadoopNet
 spec:
+  type: ClusterIP # internal network
   selector:
-    matchLabels:
-      app: WorkerNode
-  replicas: 3
-  template:
-    metadata:
-      labels:
-        app: WorkerNode
-    spec:
-      containers:
-      - name: SparkWorker
-        image: 
-        ports:
-      - name: DataNode
+    app: NameNode
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9000
+      targetport: namenode
 ---
+# Spark network
+apiVersion: v1
+kind: Service
+metadata:
+  name: SparkNet
+spec:
+  type: ClusterIP # internal network
+  selector:
+    app: SparkMaster
+  ports:
+    - name: http
+      protocol: TCP
+      port: 7077
+      targetport: sparkmaster
+---
+# Frontend ports for webGUIs
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort # externally available
+  selector:
+    app:
+      - NameNode
+      - SparkMaster
+      - NotebookServer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 50070
+      targetport: hdfsGUI
+      nodePort: 9090
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetport: sparkGUI
+      nodeport: 8080
+    - name: http
+      protocol: TCP
+      port: 4040
+      targetport: driverGUI
+      nodePort: 4040
+    - name: http
+      protocol: TCP
+      port: 8888
+      targetport: notebook
+      nodePort: 8888
+---
+# Hadoop NameNode
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Cluster
+  name: NameNode
 spec:
   selector:
     matchLabels:
-      app: WorkerNode
+      app: NameNode
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: NameNode
+    spec:
+      containers:
+      - name: NameNode
+        image: fbtrost/de1-cluster:NameNode
+        ports:
+          - containerPort: 9000
+            name: namenode
+          - containerPort: 50070
+            name: hdfsGUI
+      nodeSelector:
+        category: master #only run on Master Node
+---
+# Hadoop DataNodes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: DataNode
+spec:
+  selector:
+    matchLabels:
+      app: DataNode
   replicas: 3
   template:
     metadata:
       labels:
-        app: WorkerNode
+        app: DataNode
+    spec:
+      containers:
+      - name: DataNode
+        image: fbtrost/de1-cluster:DataNode
+      nodeSelector:
+        category: worker #only run on worker nodes
+---
+# Spark Master node
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: SparkMaster
+spec:
+  selector:
+    matchLabels:
+      app: SparkMaster
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: SparkMaster
+    spec:
+      containers:
+      - name: SparkMaster
+        image: fbtrost/de1-cluster:SparkMaster
+        #ports: 4040, 7077, 8080
+        ports:
+          - containerPort: 7077
+            name: sparkmaster
+          - containerPort: 8080
+            name: sparkGUI
+          - containerPort: 4040
+            name: driverGUI
+      nodeSelector:
+        category: master #only run on Master Node
+---
+# Spark Worker nodes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: SparkWorker
+spec:
+  selector:
+    matchLabels:
+      app: SparkWorker
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: SparkWorker
     spec:
       containers:
       - name: SparkWorker
-        image:
+        image: fbtrost/de1-cluster:SparkWorker
+      nodeSelector:
+        category: worker #only run on worker nodes
+---
+# Jupyter notebook server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: NotebookServer
+spec:
+  selector:
+    matchLabels:
+      app: NotebookServer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: NotebookServer
+    spec:
+      containers:
+      - name: NotebookServer
+        image: fbtrost/de1-cluster:NotebookServer
         ports:
-      - name: DataNode
+          - containerPort: 8888
+            name: notebook
+      nodeSelector:
+        category: submit #only run on submit node
