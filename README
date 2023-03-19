@@ -18,6 +18,21 @@
 # 'localhost:4040' for Spark Driver GUI
 # 'localhost:9870' for HDFS GUI
 # 
+# To create a SparkSession in the notebook:
+#
+#   from pyspark.sql import SparkSession
+#   driverIP = !(hostname -I)
+#   driverIP = driverIP[0].strip() # ip adress of the container running this app, needed for Spark to work
+#   spark_session = SparkSession.builder\
+#   .master("spark://sparknet:7077") \
+#   .config("spark.driver.host",f"{driverIP}")\
+#   .config("spark.driver.bindAdress","0.0.0.0")\
+#   .config("spark.driver.port","8900")\
+#   ### Do not change the above config options! ###
+#   .appName("test")\
+#   ### insert other config options here ###
+#   .getOrCreate()
+#
 # To check status of the cluster, login to the Master node and run (as root):
 # 'kubectl get deployments' to see deployment status
 # 'kubectl get pods' to see pod status
