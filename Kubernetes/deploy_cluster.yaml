@@ -33,6 +33,21 @@ spec:
     protocol: TCP
     port: 7077
     targetPort: spark-port
+# network for communication between spark nodes and driver application (currently not actually used)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driverapp
+spec:
+  type: ClusterIP # internal network
+  selector:
+    app: notebook
+  ports:
+  - name: driver-int
+    protocol: TCP
+    port: 8900
+    targetPort: driver-port
 ---
 # Frontend port for HDFS NameNode and HDFS webGUI
 apiVersion: v1
@@ -55,7 +70,7 @@ spec:
     targetPort: hdfs-gui
     nodePort: 30070
 ---
-# Frontend ports for Spark webGUIs
+# Frontend ports for Spark webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -70,13 +85,8 @@ spec:
     port: 8080
     targetPort: spark-gui
     nodePort: 30080
-  - name: driver-ext
-    protocol: TCP
-    port: 4040
-    targetPort: driver-gui
-    nodePort: 30040
 ---
-# Frontend ports for jupyter notebook
+# Frontend ports for jupyter notebook and driver webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -91,6 +101,11 @@ spec:
     port: 8888
     targetPort: notebook-port
     nodePort: 30088
+  - name: driver-ext
+    protocol: TCP
+    port: 4040
+    targetPort: driver-gui
+    nodePort: 30040
 ---
 # Hadoop NameNode
 apiVersion: apps/v1
@@ -128,7 +143,7 @@ spec:
   selector:
     matchLabels:
       app: datanode
-  replicas: 3
+  replicas: 12
   template:
     metadata:
       labels:
@@ -165,8 +180,6 @@ spec:
           name: spark-port
         - containerPort: 8080
           name: spark-gui
-        - containerPort: 4040
-          name: driver-gui
       nodeSelector:
         category: master #only run on Master Node
 ---
@@ -179,7 +192,7 @@ spec:
   selector:
     matchLabels:
       app: sparkworker
-  replicas: 3
+  replicas: 12
   template:
     metadata:
       labels:
@@ -192,7 +205,7 @@ spec:
       nodeSelector:
         category: worker #only run on worker nodes
 ---
-# Jupyter notebook server
+# Driver node / Jupyter notebook server
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -214,5 +227,9 @@ spec:
         ports:
         - containerPort: 8888
           name: notebook-port
+        - containerPort: 4040
+          name: driver-gui
+        - containerPort: 8900
+          name: driver-port
       nodeSelector:
-        category: driver #only run on submit node
+        category: driver #only run on driver node
