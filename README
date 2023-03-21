@@ -1,4 +1,5 @@
 # Kubernetes implementation:
+#
 # SparkMaster & NameNode run in separate pods on Master node
 # SparkWorkers & DataNodes run in separate pods on Worker nodes
 # NotebookServer runs on Submit node/Host node
@@ -6,19 +7,22 @@
 #
 # To add a Node to the cluster, create a new VM,add it to the security group 'Group1_Cluster',
 # and run the bash script setup_agent.sh
-# In order to label it as a worker (enabling it to host Pods that select only worker nodes),
-# login to the Master node and run (as root): kubectl label nodes <HOSTNAME_OF_NEW_WORKER> category=worker
-# then additional workers can be deployed by changing the replicas field in deployment.yaml, e.g "replicas: 10" 
 #
-# to use the cluster, simply run ./clusterConnect.sh 
-# this will ssh to the Submit/Host/Driver node with port forwarding. With this terminal window open,
+# In order to label a new node as a worker (enabling it to host Pods that select only worker nodes),
+# login to the Master node and run (as root): kubectl label nodes <HOSTNAME_OF_NEW_WORKER> category=worker
+# (same for 'master' or 'driver' nodes)
+#
+# Additional worker pods can be deployed by changing the replicas field in deploy_cluster.yaml, e.g "replicas: 10" 
+#
+# To use the cluster: run the bash script ./clusterConnect.sh on your computer,
+# this will ssh to the Driver node with port forwarding. With this terminal window open,
 # open a browser window and type:
 # 'localhost:8888' for jupyter notebook
 # 'localhost:8080' for Spark GUI
 # 'localhost:4040' for Spark Driver GUI
 # 'localhost:9870' for HDFS GUI
 # 
-# To create a SparkSession in the notebook:
+# To create a SparkSession in the notebook, use the following constructor call:
 #
 #   from pyspark.sql import SparkSession
 #   driverIP = !(hostname -I)
@@ -28,17 +32,20 @@
 #   .config("spark.driver.host",f"{driverIP}")\
 #   .config("spark.driver.bindAdress","0.0.0.0")\
 #   .config("spark.driver.port","8900")\
-#   ### Do not change the above config options! ###
+#   ### Do not change the above config options, especially not spark.driver.host! ###
 #   .appName("test")\
 #   ### insert other config options here ###
 #   .getOrCreate()
+#
+# Keep in mind that only one person should use a notebook server at a time!
 #
 # To check status of the cluster, login to the Master node and run (as root):
 # 'kubectl get deployments' to see deployment status
 # 'kubectl get pods' to see pod status
 # 'kubectl logs <POD_NAME>' to get logs from a pod for debugging
 #
-# To modify status of the cluster (Think Carefully Before Restarting The Cluster!), login to the Master node and run (as root):
+# To modify status of the cluster (think carefully about HDFS before restarting the cluster!), 
+# login to the Master node and run (as root):
 # 'kubectl delete --all deployments' to cancel all deployments (preventing pods from restarting)
 # 'kubectl delete --all pods' to cancel all pods (killing currently active pods)
-# 'kubectl apply -f deployment.yaml' to relaunch the cluster according to specifications in deployment.yaml
+# 'kubectl apply -f deploy_cluster.yaml' to relaunch the cluster according to specifications in deployment.yaml

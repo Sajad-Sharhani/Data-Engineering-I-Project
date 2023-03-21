@@ -31,11 +31,11 @@ year=$START_YEAR
 month=$START_MONTH
 
 # create a single empty destination file in HDFS, removing the old file if it exists
-if hadoop-3.3.4/bin/hdfs dfs -test -e reddit-comments
+if hdfs dfs -test -e reddit-comments
 then
-        hadoop-3.3.4/bin/hdfs dfs -rm reddit-comments
+        hdfs dfs -rm reddit-comments
 fi
-hadoop-3.3.4/bin/hdfs dfs -touchz reddit-comments
+hdfs dfs -touchz reddit-comments
 
 # loop over all months in the specified timeframe to download, extract, and append the data to the HDFS file
 until [[ $year == $END_YEAR && $month == $(($END_MONTH+1)) ]] || [[ $year == $(($END_YEAR+1)) ]]
@@ -51,7 +51,7 @@ do
 
         wget http://files.pushshift.io/reddit/comments/$filename.zst
         zstd -d $filename.zst --memory=2048MB
-        hadoop-3.3.4/bin/hdfs dfs -appendToFile $filename reddit-comments
+        hdfs dfs -appendToFile $filename reddit-comments
         rm $filename
         rm $filename.zst
 
