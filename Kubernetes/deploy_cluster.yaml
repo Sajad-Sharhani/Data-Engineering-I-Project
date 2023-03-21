@@ -3,8 +3,10 @@
 # services that allow them to communicate
 #
 # written by Filip Bodlund Trostén, 2023
-#
-# network for Hadoop nodes
+
+#### Services ####
+
+# service to communicate with NameNode
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,7 +21,8 @@ spec:
     port: 9000
     targetPort: namenode-port
 ---
-# network for Spark nodes
+
+# service to communicate with SparkMaster
 apiVersion: v1
 kind: Service
 metadata:
@@ -33,23 +36,9 @@ spec:
     protocol: TCP
     port: 7077
     targetPort: spark-port
-# network for communication between spark nodes and driver application (currently not actually used)
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: driverapp
-spec:
-  type: ClusterIP # internal network
-  selector:
-    app: notebook
-  ports:
-  - name: driver-int
-    protocol: TCP
-    port: 8900
-    targetPort: driver-port
----
-# Frontend port for HDFS NameNode and HDFS webGUI
+
+# service to enable port forwarding for HDFS webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -59,18 +48,14 @@ spec:
   selector:
     app: namenode
   ports:
-  - name: namenode-ext
-    protocol: TCP
-    port: 9000
-    targetPort: namenode-port
-    nodePort: 30090
   - name: hdfs-ext
     protocol: TCP
     port: 9870
     targetPort: hdfs-gui
     nodePort: 30070
 ---
-# Frontend ports for Spark webGUI
+
+# service to enable port forwarding for Spark webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -86,7 +71,8 @@ spec:
     targetPort: spark-gui
     nodePort: 30080
 ---
-# Frontend ports for jupyter notebook and driver webGUI
+
+# service to enable port forwarding for Jupyter Notebook and Spark driver webGUI
 apiVersion: v1
 kind: Service
 metadata:
@@ -107,6 +93,9 @@ spec:
     targetPort: driver-gui
     nodePort: 30040
 ---
+
+#### Pods ####
+
 # Hadoop NameNode
 apiVersion: apps/v1
 kind: Deployment
@@ -134,6 +123,7 @@ spec:
       nodeSelector:
         category: master #only run on Master Node
 ---
+
 # Hadoop DataNodes
 apiVersion: apps/v1
 kind: Deployment
@@ -143,7 +133,7 @@ spec:
   selector:
     matchLabels:
       app: datanode
-  replicas: 12
+  replicas: 7
   template:
     metadata:
       labels:
@@ -156,6 +146,7 @@ spec:
       nodeSelector:
         category: worker #only run on worker nodes
 ---
+
 # Spark Master node
 apiVersion: apps/v1
 kind: Deployment
@@ -183,6 +174,7 @@ spec:
       nodeSelector:
         category: master #only run on Master Node
 ---
+
 # Spark Worker nodes
 apiVersion: apps/v1
 kind: Deployment
@@ -192,7 +184,7 @@ spec:
   selector:
     matchLabels:
       app: sparkworker
-  replicas: 12
+  replicas: 7
   template:
     metadata:
       labels:
@@ -205,6 +197,7 @@ spec:
       nodeSelector:
         category: worker #only run on worker nodes
 ---
+
 # Driver node / Jupyter notebook server
 apiVersion: apps/v1
 kind: Deployment
