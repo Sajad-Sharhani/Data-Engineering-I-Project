@@ -49,3 +49,10 @@
 # 'kubectl delete --all deployments' to cancel all deployments (preventing pods from restarting)
 # 'kubectl delete --all pods' to cancel all pods (killing currently active pods)
 # 'kubectl apply -f deploy_cluster.yaml' to relaunch the cluster according to specifications in deployment.yaml
+#
+# To re-download the dataset (for a given timeframe) into HDFS, login to the Master node and run (as root):
+# 'kubectl get pods' and copy the full NAME of the NameNode pod
+# 'kubectl exec -it <NAME_OF_NAMENODE> -- bash' to start bash inside the NameNode container
+# 'chmod +x importRedditComments.sh' to give execute permission to script (only needed after pod redeployment)
+# './importRedditComments.sh <START_YEAR> <START_MONTH> <END_YEAR> <END_MONTH>'
+# This will download the dataset and put it into HDFS (see the script for more details)
