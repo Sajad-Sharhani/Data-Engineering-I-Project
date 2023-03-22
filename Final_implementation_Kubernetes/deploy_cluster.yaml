@@ -1,6 +1,7 @@
 # Kubernetes Deployments of all pods (NameNode, DataNodes, SparkMaster,
 # SparkWorkers, NotebookServer) that will run in the cluster, as well as
-# services that allow them to communicate
+# services that allow them to communicate with each other and forward 
+# relevant exposed ports to the parent node for application access
 #
 # written by Filip Bodlund Trostén, 2023
 
