@@ -1,4 +1,7 @@
 FROM ubuntu:22.04
+# Dockerfile for container running a Spark Worker in the Kubernetes cluster
+# Spark Master node is exposed as sparknet:7077 using a clusterIP service
+#
 # dependencies
 RUN apt-get update
 RUN apt-get -y upgrade

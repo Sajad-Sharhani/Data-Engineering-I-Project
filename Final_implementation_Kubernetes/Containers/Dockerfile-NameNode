@@ -1,4 +1,5 @@
 FROM ubuntu:22.04
+# Dockerfile for container running HDFS NameNode
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get install -y openjdk-11-jdk-headless
@@ -10,7 +11,10 @@ RUN mv hadoop-3.3.4/ /usr/local/hadoop
 RUN rm hadoop-3.3.4.tar.gz
 ENV HADOOP_HOME=/usr/local/hadoop
 ENV PATH=${PATH}:$HADOOP_HOME/bin
+# add HDFS config files
+# note that core-site.xml differs between NameNode and DataNodes to get the network to function
 ADD core-site_NameNode.xml /usr/local/hadoop/etc/hadoop/core-site.xml
 ADD hdfs-site.xml /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+# add script to download and insert dataset into HDFS 
 ADD importRedditComments.sh importRedditComments.sh
 CMD bash -c "$HADOOP_HOME/bin/hdfs namenode -format && $HADOOP_HOME/bin/hdfs namenode"
